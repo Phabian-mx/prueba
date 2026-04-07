@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación XV Años - Evolet Xiurabe</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Great+Vibes&family=Montserrat:wght@300;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* =========================================
+           VARIABLES GLOBALES
+           ========================================= */
+        :root {
+            --dorado-real: #d4af37;
+            --dorado-brillo: #f9e29c;
+            --rojo-oscuro: #4a0000; 
+            --fondo-rojo: #5c0000; 
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--fondo-rojo);
+            font-family: 'Montserrat', sans-serif;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3 { font-weight: normal; margin: 0; }
+        p { margin: 10px 0; }
+
+        /* =========================================
+           ESCENA DEL SOBRE
+           ========================================= */
+        #envelope-scene {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100vh; width: 100vw;
+            position: fixed; top: 0; left: 0;
+            background-color: var(--fondo-rojo);
+            z-index: 10000;
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .envelope {
+            position: relative;
+    position: relative;
+    width: 380px; 
+    height: 208px; 
+    cursor: pointer;
+    perspective: 1500px; /* Más profundidad */
+    transform-style: preserve-3d;
+    margin-bottom: 20px;
+        }
+
+        .envelope:hover { transform: scale(1.03); transition: transform 0.3s ease; }
+
+        .lid-top {
+   position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%;
+    z-index: 5; /* Aseguramos que esté por encima de todo */
+    transform-origin: top center; 
+    transition: transform 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Importante para que no se vea el "reverso" de la imagen si no quieres */
+    backface-visibility: visible;
+        }
+
+        .envelope-body {
+         position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%;
+    height: 100%; /* Corregido de 100 a 100% */
+    z-index: 2;
+    border-radius: 5px;
+    object-fit: fill;
+        }
+
+  
+        .envelope.open .lid-top { 
+   /* Giramos un poco menos de 180 para que no se "pegue" al fondo y se pierda */
+    transform: rotateX(150deg); 
+    z-index: 1; /* Al final del movimiento se sitúa detrás para dejar ver el contenido */
+}
+
+        .envelope.open .seal { opacity: 0; }
+
+        .instruccion-sobre {
+            color: var(--dorado-brillo); 
+            font-family: 'Montserrat', sans-serif; letter-spacing: 3px; font-size: 0.9rem;
+            animation: palpitar 2s infinite; font-weight: bold; text-transform: uppercase;
+        }
+
+        @keyframes palpitar {
+            0%, 100% { opacity: 0.5; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        /* =========================================
+           CONTENIDO PRINCIPAL
+           ========================================= */
+        #main-content {
+            display: none; opacity: 0;
+            transition: opacity 1.5s ease;
+            position: relative; z-index: 10;
+            padding: 0; margin: 0;
+            text-align: center;
+        }
+
+        #particles-js { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+
+        header { 
+        position: relative;
+            margin-top: 0; 
+            padding: 60px 20px 40px 20px;
+            /* Un gradiente mucho más transparente para no ocultar la foto */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('imagenes/0.png'); 
+            background-size: cover;
+            background-position: center;
+            border-bottom: 2px dashed rgba(212,175,55,0.4);
+        }
+
+        header h1, header p, header img { position: relative; z-index: 2; }
+
+        header h1 {
+            font-family: 'Great Vibes', cursive; font-size: 4.5rem;
+            color: white; margin: 10px 0;
+            text-shadow: 0 2px 15px rgba(212, 175, 55, 0.8);
+        }
+
+        .content-card {
+            background: rgba(20, 0, 0, 0.5);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            border-radius: 15px;
+            padding: 30px; margin: 30px auto;
+            max-width: 550px; width: 90%;
+            transform: translateY(40px); opacity: 0;
+            transition: all 1s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .content-card.active { transform: translateY(0); opacity: 1; }
+
+        .content-card h2 { 
+            font-family: 'Montserrat', sans-serif; font-weight: 600; text-transform: uppercase;
+            color: var(--dorado-brillo); font-size: 1.3rem; margin-bottom: 20px; letter-spacing: 2px;
+        }
+
+        .countdown-grid { display: flex; justify-content: center; gap: 15px; margin-top: 25px; }
+        .count-item {
+            background: rgba(212, 175, 55, 0.15); padding: 15px; border-radius: 12px; min-width: 60px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+        .count-item div { font-size: 2.2rem; color: var(--dorado-brillo); font-weight: 600; }
+        .count-item span { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--dorado-real); }
+
+        .titulo-familia { color: var(--dorado-brillo); margin-top: 20px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem;}
+        .nombres-familia { margin-top: 5px; font-size: 1.1rem; color: #ddd; line-height: 1.6; }
+
+        .gallery-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+        .gallery-thumbnail {
+            width: calc(33.333% - 10px); min-width: 90px; aspect-ratio: 1; 
+            object-fit: cover; border-radius: 10px; border: 2px solid rgba(212,175, 55,0.5); 
+            cursor: pointer; transition: transform 0.3s ease;
+        }
+        .gallery-thumbnail:hover { transform: scale(1.05); border-color: var(--dorado-real); }
+
+        .modal {
+            display: none; position: fixed; z-index: 12000; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.9);
+            justify-content: center; align-items: center;
+        }
+        .modal-image { max-width: 90%; max-height: 80%; border: 3px solid var(--dorado-real); border-radius: 10px; }
+        .flecha { 
+            cursor: pointer; position: absolute; top: 50%; transform: translateY(-50%);
+            padding: 15px; color: white; font-size: 40px; background: rgba(0,0,0,0.5); border-radius: 50%; 
+            user-select: none; transition: background 0.3s;
+        }
+        .flecha:hover { background: rgba(212, 175, 55, 0.7); color: var(--rojo-oscuro); }
+        .prev { left: 20px; } .next { right: 20px; }
+        .close-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 40px; cursor: pointer; }
+
+        .btn {
+            background: linear-gradient(45deg, var(--dorado-real), #ffe55c);
+            color: var(--rojo-oscuro); padding: 15px 30px; border-radius: 30px;
+            text-decoration: none; font-weight: bold; display: inline-block;
+            margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.4); font-size: 0.9rem; text-transform: uppercase;
+        }
+
+        .audio-control {
+            position: fixed; bottom: 30px; right: 30px; z-index: 11000;
+            background: rgba(20,0,0,0.6); border: 2px solid var(--dorado-real); border-radius: 50%;
+            width: 55px; height: 55px; cursor: pointer; font-size: 22px; color: gold;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="musica" loop>
+        <source src="imagenes/audio.m4a" type="audio/mpeg">
+    </audio>
+
+    <button id="btnMusica" class="audio-control">🔊</button>
+    
+    <canvas id="particles-js"></canvas>
+
+    <div id="envelope-scene">
+        <div class="envelope" onclick="abrirInvitacion()">
+            <img src="imagenes/sobre1.png" alt="Solapa" class="lid-top">
+            <img src="imagenes/sobre.png" alt="Cuerpo" class="envelope-body">
+         
+        </div>
+        <p class="instruccion-sobre">TOCA EL SOBRE PARA ABRIR</p>
+    </div>
+
+    <div id="main-content">
+        <header>
+            <p style="font-size: 1rem; letter-spacing: 5px; color: var(--dorado-brillo); text-transform: uppercase;">Bienvenidos a</p>
+            <h1>Mis XV Años</h1>
+            <p style="font-size: 1.5rem; font-family: 'Cinzel Decorative', serif; color: var(--dorado-brillo); margin-top: -10px;">Evolet Xiurabe</p>
+            <img src="imagenes/1.png" alt="Foto principal" style="width: 100%; max-width: 300px; border-radius: 50%; border: 5px solid var(--dorado-real); margin-top: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.7);">
+        </header>
+
+        <section class="content-card reveal">
+            <h2>Mi Historia</h2>
+            <p style="font-style: italic; color: #eee; line-height: 1.7;">"Hay momentos en la vida que son irrepetibles, pero compartirlos con las personas que más quieres los vuelve inolvidables"</p>
+            <img src="imagenes/2.png" alt="Evolet Xiurabe" style="width: 100%; max-width: 280px; border-radius: 15px; border: 3px solid var(--dorado-real); margin-top: 20px;">
+        </section>
+
+        <section class="content-card reveal">
+            <h2 style="font-size: 1.4rem; line-height: 1.4; text-transform: none;">Doy gracias a Dios por celebrar mi alegría junto a ustedes.</h2>
+            <div class="titulo-familia">Padres</div>
+            <div class="nombres-familia">Yara Zenahide Yañez Arellano <br> Christian Uriel Simental Aceves</div>
+            <hr style="border: none; border-top: 1px dashed rgba(212, 175, 55, 0.3); margin: 20px 0;">
+            <div class="titulo-familia">Padrinos</div>
+            <div class="nombres-familia">Erika Lucia Gonzalez Romero <br> Juan Macedo Maldonado</div>
+        </section>
+
+        <section class="content-card reveal">
+            <h2>Fecha del evento:</h2>
+            <h3 style="font-family: 'Montserrat', sans-serif; font-size: 1.8rem; font-weight: bold; color: var(--dorado-brillo); margin-top: 10px;">09 de mayo</h3>
+            <div class="countdown-grid">
+                <div class="count-item"><div id="d">00</div><span>Días</span></div>
+                <div class="count-item"><div id="h">00</div><span>Hrs</span></div>
+                <div class="count-item"><div id="m">00</div><span>Min</span></div>
+                <div class="count-item"><div id="s">00</div><span>Seg</span></div>
+            </div>
+        </section>
+
+        <section class="content-card reveal">
+            <h2>Itinerario</h2>
+            <div style="text-align: center; padding: 0 15px; font-size: 1.1rem; line-height: 1.8;">
+                <p>⛪ <b style="color:var(--dorado-brillo)">Ceremonia:</b> 17:30 hrs<br><span style="color:#ddd; padding-left: 28px;">Parroquia de San Miguel Arcángel</span></p>
+                <a href="https://maps.app.goo.gl/5PowVg8CpWgzHN828" target="_blank" class="btn" style="padding: 10px 20px; font-size: 0.8rem; margin: -5px 0 0 28px;">📍 VER MAPA</a>
+                <hr style="border: none; border-top: 1px dashed rgba(212, 175, 55, 0.2); margin: 30px 0;">
+                <p>💃 <b style="color:var(--dorado-brillo)">Recepción:</b> 20:00 hrs<br><span style="color:#ddd; padding-left: 28px;">Salón de Eventos "Real de las palmas"</span></p>
+                <a href="https://maps.app.goo.gl/vXdZ7FdXmr11iZfX7" target="_blank" class="btn" style="padding: 10px 20px; font-size: 0.8rem; margin: -5px 0 0 28px;">📍 VER MAPA</a>
+            </div>
+        </section>
+
+        <section class="content-card reveal">
+            <h2>Sesión en Jardín Japonés</h2>
+            <div class="gallery-container">
+                <img src="imagenes/2.png" class="gallery-thumbnail" onclick="openModal(0)">
+                <img src="imagenes/3.png" class="gallery-thumbnail" onclick="openModal(1)">
+                <img src="imagenes/4.png" class="gallery-thumbnail" onclick="openModal(2)">
+                <img src="imagenes/5.png" class="gallery-thumbnail" onclick="openModal(3)">
+                <img src="imagenes/6.png" class="gallery-thumbnail" onclick="openModal(4)">
+                <img src="imagenes/7.png" class="gallery-thumbnail" onclick="openModal(5)">
+                <img src="imagenes/12.png" class="gallery-thumbnail" onclick="openModal(6)">
+                 <img src="imagenes/14.png" class="gallery-thumbnail" onclick="openModal(7)">
+                <img src="imagenes/16.png" class="gallery-thumbnail" onclick="openModal(8)">
+            </div>
+        </section>
+
+        <section class="content-card reveal" style="margin-bottom: 50px;">
+            <h2>Detalles Importantes</h2>
+            <div style="line-height: 1.8; margin-top: 10px; font-size: 1.1rem; text-align: center; padding: 0 10px;">
+                
+                <p>💌 <b style="color:var(--dorado-brillo)">Lluvia de Sobres:</b><br>
+                <span style="font-size: 0.95rem; color: #ddd;">Si deseas tener un detalle conmigo, contaré con un buzón especial para recibir tu regalo en efectivo el día del evento.</span></p>
+
+                <hr style="border: none; border-top: 1px dashed rgba(212, 175, 55, 0.2); margin: 20px 0;">
+
+                <p>🎁 <b style="color:var(--dorado-brillo)">Regalo Físico:</b><br>
+                <span style="font-size: 0.95rem; color: #ddd;">Tu presencia es mi mejor regalo, pero si deseas obsequiarme algo especial, ¡será bienvenido!</span></p>
+
+                <hr style="border: none; border-top: 1px dashed rgba(212, 175, 55, 0.2); margin: 20px 0;">
+
+                <p>🛍️ <b style="color:var(--dorado-brillo)">Mesa de Regalos:</b><br>
+                Liverpool - Clave: <b style="color:var(--dorado-brillo); font-size: 1.2rem;">51939543</b></p>
+                <hr style="border: none; border-top: 1px dashed rgba(212, 175, 55, 0.2); margin: 20px 0;">
+            </div>
+
+            <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51939543" target="_blank" class="btn" style="background: #E6007E; color: white; display: block; margin: 15px auto; width: fit-content; border: none;">🛍️ VER MESA DE REGALOS</a>
+            <hr style="border: none; border-top: 1px dashed rgba(212, 175, 55, 0.2); margin: 25px 0;">
+            <a href="https://wa.link/9hvxsh" target="_blank" class="btn" style="background:linear-gradient(45deg, #128C7E, #25D366); color: white; display:block; margin: 10px auto; width: fit-content;">✅ CONFIRMAR ASISTENCIA</a>
+        </section>
+    </div>
+
+    <div id="gallery-modal" class="modal">
+        <span class="close-modal" onclick="closeModal()">×</span>
+        <span class="flecha prev" onclick="cambiarImagen(-1)">❮</span>
+        <img id="modal-image" class="modal-image" alt="Visualización">
+        <span class="flecha next" onclick="cambiarImagen(1)">❯</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        // 1. PARTÍCULAS
+        particlesJS("particles-js", {
+            "particles": {
+                "number": { "value": 60 },
+                "color": { "value": "#f9e29c" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.8, "random": true },
+                "size": { "value": 3, "random": true },
+                "move": { "enable": true, "speed": 1.2, "direction": "bottom", "out_mode": "out" }
+            }
+        });
+
+        // 2. LLUVIA DE CONFETI MULTICOLOR
+        function lanzarConfetiColores() {
+            var duration = 5 * 1000; 
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 15, angle: 60, spread: 55, origin: { x: 0 } });
+                confetti({ particleCount: 15, angle: 120, spread: 55, origin: { x: 1 } });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+        }
+
+        // 3. ABRIR INVITACIÓN
+        function abrirInvitacion() {
+    const scene = document.getElementById('envelope-scene');
+    const music = document.getElementById('musica');
+    const btnMusica = document.getElementById('btnMusica');
+
+// --- EFECTO FADE-IN (EMPEZAR DESPACIO) ---
+    music.volume = 0; // Empezamos en silencio
+    music.play().then(() => {
+        btnMusica.innerHTML = "🔊";
+        
+        // Subir el volumen poco a poco
+        let fadeAudio = setInterval(() => {
+            // Si el volumen es menor a 1 (máximo), sumamos un poco
+            if (music.volume < 0.9) {
+                music.volume += 0.1; // Sube de 10% en 10%
+            } else {
+                music.volume = 1;
+                clearInterval(fadeAudio); // Detenemos el ciclo cuando llega al máximo
+            }
+        }, 200); // Se ejecuta cada 200ms (el fade dura unos 2 segundos)
+        
+    }).catch(e => {
+        console.log("Error al reproducir audio:", e);
+    });
+
+    // 2. Iniciar animación del sobre
+    document.querySelector('.envelope').classList.add('open');
+    
+    // 3. Transición a la invitación
+    setTimeout(() => {
+        scene.style.transform = 'scale(2.5)';
+        scene.style.opacity = '0';
+        
+        setTimeout(() => {
+            scene.style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            lanzarConfetiColores(); 
+            
+            setTimeout(() => {
+                document.getElementById('main-content').style.opacity = '1';
+                revelarAlScroll();
+            }, 100);
+        }, 1000);
+    }, 1500); // Tiempo para apreciar la solapa abriéndose
+}
+        // 4. GALERÍA - Actualizamos el array para que coincida con tus imágenes
+        let imagenes = [
+            "imagenes/2.png", "imagenes/3.png", "imagenes/4.png", 
+            "imagenes/5.png", "imagenes/6.png", "imagenes/7.png", 
+            "imagenes/12.png", "imagenes/14.png", "imagenes/16.png"
+
+            ];
+        let idActual = 0;
+
+        function openModal(index) {
+            idActual = index;
+            document.getElementById('modal-image').src = imagenes[idActual];
+            document.getElementById('gallery-modal').style.display = 'flex';
+        }
+        
+        function closeModal() { document.getElementById('gallery-modal').style.display = 'none'; }
+        
+        function cambiarImagen(dir) {
+            idActual = (idActual + dir + imagenes.length) % imagenes.length;
+            document.getElementById('modal-image').src = imagenes[idActual];
+        }
+        
+        document.getElementById('gallery-modal').addEventListener('click', function(e) {
+            if(e.target === this) closeModal();
+        });
+
+        // 5. EFECTO REVEAL
+        function revelarAlScroll() {
+            document.querySelectorAll(".reveal").forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 50) el.classList.add("active");
+            });
+        }
+        window.addEventListener("scroll", revelarAlScroll);
+
+        // 6. CUENTA REGRESIVA
+        const targetDate = new Date("May 09, 2026 17:30:00").getTime();
+        setInterval(() => {
+            const diff = targetDate - new Date().getTime();
+            if(diff > 0) {
+                document.getElementById('d').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+                document.getElementById('h').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+                document.getElementById('m').innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
+                document.getElementById('s').innerText = Math.floor((diff / 1000) % 60).toString().padStart(2, '0');
+            }
+        }, 1000);
+        
+        // 7. MÚSICA
+const musica = document.getElementById("musica");
+const btnMusica = document.getElementById("btnMusica");
+
+btnMusica.addEventListener('click', function(e) {
+    e.stopPropagation(); // Evita que el click se pase al sobre
+    if (musica.paused) { 
+        musica.volume = 1; 
+        musica.play();
+        btnMusica.innerHTML = "🔊"; 
+    } else { 
+        musica.pause(); 
+        btnMusica.innerHTML = "🔇"; 
+    }
+});
+    </script>
+</body>
+</html>
